@@ -1,0 +1,40 @@
+name: voyant-trove
+
+services:
+  # the front end proxy listens on port 80 and proxies incoming requests to one or other of the back end containers
+  front-end-proxy:
+    image: httpd
+    volumes:
+      - type: bind
+        source: httpd.conf
+        target: /usr/local/apache2/conf/httpd.conf
+      - type: bind
+        source: htdocs/
+        target: /usr/local/apache2/htdocs/
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+    networks: 
+      - back_end_network
+  
+  # the trove proxy listens on port 8080 and proxies requests to Trove's API
+  # and rewrites the responses
+  trove-proxy:
+    image: trove-proxy
+    expose: 
+      - "8080"
+    networks: 
+      - back_end_network
+
+  # the voyant container listens on port 8080 and provides a text analysis application
+  voyant:
+    image: voyant-docker
+    expose: 
+      - "8888"
+    networks: 
+      - back_end_network
+      
+networks:
+    back_end_network:
+

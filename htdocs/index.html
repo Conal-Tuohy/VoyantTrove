@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Trove + Voyant</title>
+		<style>
+			body, input, select, button {
+				font-family: sans-serif;
+			}
+			h1 {
+				text-align: center;
+			}
+			#trove-form {
+				display: grid;
+				grid-template-columns: 8em 1fr;
+				gap: 0.5em;
+			}
+			#trove-form label {
+				text-align: right;
+				font-size: 0.8em;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Trove + Voyant</h1>
+        <p>This web application combines three applications:
+        <ul>
+            <li>The text visualization tool Voyant</li>
+            <li>the TroveProxy application which converts Trove data into TEI XML, which can be imported into Voyant Tools</li>
+            <li>A Trove Query-Builder form which helps to construct a Trove query</li>
+        </ul>
+        <p>You can now:</p>
+        <ul>
+    		<li>Open the <a href="web/">Trove Query Builder form</a> to generate a URL which identifies a set of Trove records,
+            and specifies that they be returned in the form of a TEI corpus. Using the form you can pass the URL of that corpus to Voyant
+            for it to import and analyse.</li>
+    		<li>Or you can <a href="/voyant">open Voyant Tools</a> directly,</li>
+    		<li>or <a href="/spyral">create and run Spyral notebooks</a>.</li>
+        </ul>
+	</body>
+</html>
