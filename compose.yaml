@@ -21,7 +21,8 @@ services:
   # the trove proxy listens on port 8080 and proxies requests to Trove's API
   # and rewrites the responses
   trove-proxy:
-    image: trove-proxy
+    # image: trove-proxy
+    image: ghcr.io/conal-tuohy/troveproxy:main
     expose: 
       - "8080"
     networks: 
@@ -29,7 +30,8 @@ services:
 
   # the voyant container listens on port 8080 and provides a text analysis application
   voyant:
-    image: voyant-docker
+#    image: voyant-docker
+    image: ghcr.io/conal-tuohy/voyantdocker:main
     expose: 
       - "8888"
     networks: 
