@@ -3,14 +3,22 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Trove Query Builder</title>
+		<link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png"/>
+		<link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png"/>
+		<link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png"/>
 		<script src="TroveQuery.js"></script>
 		<script src="TroveFacet.js"></script>
+		<script src="TroveDatasetMetadata.js"></script>
+		<script src="Harvester.js"></script>
 		<style>
 			body, input, select, button {
 				font-family: sans-serif;
 			}
 			h1 {
 				text-align: center;
+			}
+			#run-query {
+				padding: 1em;
 			}
 			#trove-form {
 				display: grid;
@@ -21,11 +29,16 @@
 				text-align: right;
 				font-size: 0.8em;
 			}
+			#trove-form input[type=checkbox] {
+				width: 1em;
+			}
 		</style>
 	</head>
 	<body>
 		<h1>Query Trove</h1>
 		<form id="trove-form" name="trove" action="/proxy/v3/result" method="get" target="_blank">
+			<label for="metadata">Dataset description</label>
+			<trove-dataset-metadata id="metadata"></trove-dataset-metadata>		
 			<label for="key">API Key</label>
 			<input name="key" id="key" value="">
 			
@@ -40,7 +53,10 @@
 			</select>
             -->
 			
-			<label for="n">Maximum number of results</label>
+			<label for="proxy-max-requests">Maximum API calls (per category)</label>
+			<input name="proxy-max-requests" id="proxy-max-requests" type="number" min="1" max="10000000" value="10"/>
+			
+			<label for="n">Maximum number of results (per API call)</label>
 			<input name="n" id="n" value="100" type="number" min="1" max="100">
 		
 			<label for="sortby">Sort by</label>
@@ -51,7 +67,7 @@
 			</select>
 			
 			<label for="bulkHarvest">Bulk harvest</label>
-			<input type="checkbox" id="bulkHarvest" name="bulkHarvest" value="true" />
+			<input type="checkbox" id="bulkHarvest" name="bulkHarvest" checked="checked" />
 			
 			<label for="reclevel">Record level of detail</label>
 			<select name="reclevel" id="reclevel">
@@ -70,11 +86,11 @@
 				<option value="lists">Names and identifiers of lists which items belong to</option>
 				<option value="subscribinglibs">Institutional subscriptions to the items</option>
 				<option value="tags">Tags added by members of the public</option>
-				<option value="workversions">All available versions of the items</option>
+				<option value="workversions" selected="selected">All available versions of the items</option>
 			</select>
 			
 			<label for="proxy-include-people-australia">Include extra details from People Australia</label>
-			<input type="checkbox" id="proxy-include-people-australia" name="proxy-include-people-australia" value="true" />
+			<input type="checkbox" id="proxy-include-people-australia" name="proxy-include-people-australia" checked="checked" />
 
 			<label for="category">Category</label>
 			<select name="category" id="category" multiple="multiple">
@@ -171,30 +187,47 @@
 			<label for="l-occupation">Occupation</label>
 			<trove-facet id="l-occupation" name="l-occupation"></trove-facet>
 			
-			<label>Run query</label>
-			<div>
-				<button id="open-in-new-window">Open URL of TEI corpus in a new browser window</button>
-				<button id="open-in-voyant">Open TEI corpus in Voyant</button>
-			</div>
 		</form>
+		<div class="run-query">
+			<button id="open" form="trove-form">Open query result in browser</button>
+			<button id="harvest" form="trove-form">Harvest query results</button>
+			<button id="open-in-voyant" form="trove-form">Open TEI corpus in Voyant</button>
+		</div>
 		<script>
-			document
-                .getElementById("open-in-voyant")
-                .addEventListener(
-                    "click", 
-                    (event) => {
-                        // The default handling for this event would submit the form
-                        // but we don't want that to happen as we are passing the query URL
-                        // to Voyant instead.
-                        event.preventDefault();
-                        // generate the query URL
-                        const form = event.target.form;
-                		const formData = new FormData(form);
-                        // instruct voyant to load the corpus from the trove-proxy container
-                        const queryURL = "http://trove-proxy:8080/proxy/v3/result?" + new URLSearchParams(formData).toString();
-                        window.open('/voyant?input=' + encodeURIComponent(queryURL));
-                    }
-                );
+			document.getElementById("open-in-voyant").addEventListener(
+				"click", 
+				(event) => {
+					// The default handling for this event would submit the form
+					// but we don't want that to happen as we are passing the query URL
+					// to Voyant instead.
+					event.preventDefault();
+					// generate the query URL
+					const form = event.target.form;
+					const formData = new FormData(form);
+					// instruct voyant to load the corpus from the trove-proxy container
+					const queryURL = "http://trove-proxy:8080/proxy/v3/result?" + new URLSearchParams(formData).toString();
+					window.open('/voyant?input=' + encodeURIComponent(queryURL));
+				}
+			);
+			document.getElementById("harvest").addEventListener(
+				"click", 
+				(event) => {
+					// The default handling for this event would submit the form
+					// but we don't want that to happen as we are passing the query URL
+					// to the harvester instead.
+					event.preventDefault();
+					// generate the query URL
+					const form = event.target.form;
+					const formData = new FormData(form);
+					// construct a URL for the data to be harvested from our proxied API's sarch URL and the search params from the form 
+					const queryURL = "http://localhost:8080/proxy/v3/result?" + new URLSearchParams(formData).toString();
+					// instruct the harvester to load the corpus from the trove-proxy container
+					var urlSearchParams = new URLSearchParams();
+					urlSearchParams.append('url', queryURL);
+					harvest('/harvester/harvest/', urlSearchParams) // start the harvest
+						.then((url) => {window.open(url)}); // open the harvest's web page
+				}
+			);
 		</script>
 	</body>
 </html>
