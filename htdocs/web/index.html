@@ -205,7 +205,7 @@
 					const form = event.target.form;
 					const formData = new FormData(form);
 					// instruct voyant to load the corpus from the trove-proxy container
-					const queryURL = "http://trove-proxy:8080/proxy/v3/result?" + new URLSearchParams(formData).toString();
+					const queryURL = form.action + "?" + new URLSearchParams(formData).toString();
 					window.open('/voyant?input=' + encodeURIComponent(queryURL));
 				}
 			);
@@ -220,7 +220,7 @@
 					const form = event.target.form;
 					const formData = new FormData(form);
 					// construct a URL for the data to be harvested from our proxied API's sarch URL and the search params from the form 
-					const queryURL = "http://localhost:8080/proxy/v3/result?" + new URLSearchParams(formData).toString();
+					const queryURL = form.action + "?" + new URLSearchParams(formData).toString();
 					// instruct the harvester to load the corpus from the trove-proxy container
 					var urlSearchParams = new URLSearchParams();
 					urlSearchParams.append('url', queryURL);
